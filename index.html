@@ -344,6 +344,12 @@
   .seg button.ativo[data-quem="eu"]{ color:#3F756A; }
   .seg button.ativo[data-quem="ela"]{ color:#A76746; }
   .seg button.ativo[data-quem="juntos"]{ color:#687F54; }
+  .btn-add-value{
+    width:100%; min-height:46px; border:1px solid #DCE6DE;
+    border-radius:16px; background:#fff; color:#48675B;
+    font:inherit; font-size:13px; font-weight:800; cursor:pointer;
+    box-shadow:0 4px 12px rgba(49,72,62,.08);
+  }
 
   /* ---------- GRADE ---------- */
   .grid{
@@ -622,6 +628,7 @@
         <button data-quem="ela">💜 Antonella</button>
         <button data-quem="juntos">🤝 Juntos</button>
       </div>
+      <button class="btn-add-value" id="btnAdicionarValor" type="button">＋ Adicionar valor guardado</button>
     </div>
 
     <div class="grid" id="grid"></div>
@@ -665,6 +672,23 @@
       <button class="btn-conf" id="btnSalvarEdicao" type="button">Salvar</button>
     </div>
     <div class="erro" id="erroEdicao"></div>
+  </div>
+</div>
+
+<div class="modal" id="modalAdicionarValor" hidden>
+  <div class="modal-box">
+    <div class="emoji">💰</div>
+    <h3>Adicionar valor guardado</h3>
+    <p class="edit-help">Registre uma quantia de uma vez, sem preencher vários quadradinhos. O valor será lançado para <strong id="pessoaAdicionarValor"></strong>.</p>
+    <div class="edit-field">
+      <label for="inpAdicionarValor">Valor guardado</label>
+      <input id="inpAdicionarValor" type="text" inputmode="decimal" autocomplete="off" placeholder="R$ 50,00">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-sec" id="btnCancelarAdicionarValor" type="button">Cancelar</button>
+      <button class="btn-conf" id="btnConfirmarAdicionarValor" type="button">Adicionar</button>
+    </div>
+    <div class="erro" id="erroAdicionarValor" role="alert"></div>
   </div>
 </div>
 

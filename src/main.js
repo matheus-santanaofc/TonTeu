@@ -59,6 +59,13 @@ import { auth, db } from './firebase.js';
   const btnCancelarEdicao = document.getElementById('btnCancelarEdicao');
   const btnSalvarEdicao = document.getElementById('btnSalvarEdicao');
   const erroEdicao = document.getElementById('erroEdicao');
+  const btnAdicionarValor = document.getElementById('btnAdicionarValor');
+  const modalAdicionarValor = document.getElementById('modalAdicionarValor');
+  const pessoaAdicionarValor = document.getElementById('pessoaAdicionarValor');
+  const inpAdicionarValor = document.getElementById('inpAdicionarValor');
+  const btnCancelarAdicionarValor = document.getElementById('btnCancelarAdicionarValor');
+  const btnConfirmarAdicionarValor = document.getElementById('btnConfirmarAdicionarValor');
+  const erroAdicionarValor = document.getElementById('erroAdicionarValor');
 
   const rGuardado  = document.getElementById('rGuardado');
   const rMeta      = document.getElementById('rMeta');
@@ -908,9 +915,70 @@ import { auth, db } from './firebase.js';
     fecharEdicaoQuadradinho();
   });
 
+  function fecharModalAdicionarValor(){
+    modalAdicionarValor.hidden = true;
+    erroAdicionarValor.classList.remove('visivel');
+  }
+
+  btnAdicionarValor.addEventListener('click', function(){
+    if(!state) return;
+    pessoaAdicionarValor.textContent = LABEL[state.quem] || LABEL.eu;
+    inpAdicionarValor.value = '';
+    erroAdicionarValor.textContent = '';
+    erroAdicionarValor.classList.remove('visivel');
+    modalAdicionarValor.hidden = false;
+    inpAdicionarValor.focus();
+  });
+
+  btnCancelarAdicionarValor.addEventListener('click', fecharModalAdicionarValor);
+  modalAdicionarValor.addEventListener('click', function(e){
+    if(e.target === modalAdicionarValor) fecharModalAdicionarValor();
+  });
+
+  btnConfirmarAdicionarValor.addEventListener('click', function(){
+    if(!state) return;
+    const valor = parseMoney(inpAdicionarValor.value);
+    if(!Number.isSafeInteger(valor) || valor <= 0){
+      erroAdicionarValor.textContent = 'Digite um valor maior que zero 💗';
+      erroAdicionarValor.classList.add('visivel');
+      inpAdicionarValor.focus();
+      return;
+    }
+
+    const guardado = state.items.reduce(function(soma, item){
+      return soma + (item.by ? item.v : 0);
+    }, 0);
+    const restante = state.totalCents - guardado;
+    if(valor > restante){
+      erroAdicionarValor.textContent = 'Esse valor é maior do que falta para atingir a meta.';
+      erroAdicionarValor.classList.add('visivel');
+      inpAdicionarValor.focus();
+      return;
+    }
+
+    const item = state.items.find(function(registro){ return !registro.by; });
+    if(!item){
+      erroAdicionarValor.textContent = 'Todos os quadradinhos já foram preenchidos.';
+      erroAdicionarValor.classList.add('visivel');
+      return;
+    }
+
+    item.v = valor;
+    item.defaultV = valor;
+    item.by = state.quem;
+    item.savedOn = dataLocalISO(new Date());
+    redimensionarGrade(state.items.length);
+    salvar();
+    renderGrade();
+    atualizarQuem();
+    atualizarResumo();
+    fecharModalAdicionarValor();
+  });
+
   document.addEventListener('keydown', function(e){
     if(e.key !== 'Escape') return;
-    if(!modalEdicao.hidden) fecharEdicaoQuadradinho();
+    if(!modalAdicionarValor.hidden) fecharModalAdicionarValor();
+    else if(!modalEdicao.hidden) fecharEdicaoQuadradinho();
     else if(!modal.hidden) modal.hidden = true;
   });
 

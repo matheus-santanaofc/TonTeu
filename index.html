@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#F3F2EA">
+<title>Nosso Cofrinho 💗</title>
+<style>
+  :root{
+    --texto:#33443E;
+    --suave:#718079;
+    --creme:#F3F2EA;
+    --matheus:#3F756A;
+    --antonella:#B46F4F;
+    --juntos:#82986E;
+  }
+
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+  html,body{ margin:0; padding:0; }
+
+  body{
+    font-family: ui-rounded, "SF Pro Rounded", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    color:var(--texto);
+    background:
+      linear-gradient(170deg,rgba(244,242,233,.78) 0%,rgba(231,239,233,.84) 45%,rgba(244,238,226,.78) 100%),
+      url("./P%C3%B4r%20do%20Sol%20e%20Pr%C3%B3xima%20Viagem.png") center / cover no-repeat;
+    background-attachment: fixed;
+    min-height:100dvh;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    -webkit-font-smoothing: antialiased;
+    overscroll-behavior-y: contain;
+  }
+
+  [hidden]{ display:none !important; }
+
+  .app{
+    max-width:480px;
+    margin:0 auto;
+    padding:0 16px calc(36px + env(safe-area-inset-bottom));
+  }
+
+  /* ---------- SETUP ---------- */
+  .setup-topo{ text-align:center; padding:38px 0 22px; }
+  .setup-emoji{
+    width:78px; height:78px; margin:0 auto 14px;
+    display:grid; place-items:center; font-size:38px;
+    background:#fff; border-radius:28px;
+    box-shadow:0 10px 26px rgba(49,72,62,.16);
+  }
+  .setup-topo h1{ font-size:23px; margin:0 0 8px; letter-spacing:.2px; }
+  .setup-topo p{ font-size:14px; line-height:1.5; color:var(--suave); margin:0; }
+  .card{
+    background:rgba(255,255,255,.88);
+    border:1px solid rgba(255,255,255,.9);
+    border-radius:26px;
+    padding:22px 18px;
+    box-shadow:0 10px 30px rgba(49,72,62,.15), 0 2px 6px rgba(49,72,62,.07);
+    margin-bottom:16px;
+  }
+
+  .campo{ margin-bottom:16px; }
+  .campo:last-of-type{ margin-bottom:22px; }
+  .campo label{
+    display:block; font-size:13px; font-weight:700;
+    color:var(--suave); margin:0 0 7px 8px;
+  }
+  .input-wrap{
+    display:flex; align-items:center; gap:8px;
+    background:#F5F7F2; border:2px solid #DCE6DE;
+    border-radius:18px; padding:0 16px; height:58px;
+    transition: border-color .2s, background .2s;
+  }
+  .input-wrap:focus-within{ border-color:#6D9A83; background:#fff; }
+  .input-wrap .prefixo{ font-size:14px; font-weight:800; color:var(--suave); }
+  .input-wrap input{
+    flex:1; min-width:0; border:0; background:transparent; outline:none;
+    font:inherit; font-size:20px; font-weight:800; color:var(--texto);
+  }
+  .input-wrap input::placeholder{ color:#AAB8AE; font-weight:700; }
+
+  .btn-primary{
+    width:100%; height:58px; border:0; border-radius:20px;
+    font:inherit; font-size:16px; font-weight:800; color:#fff;
+    background:linear-gradient(135deg,#3F756A 0%,#82986E 100%);
+    box-shadow:0 10px 22px rgba(63,117,106,.28);
+    cursor:pointer; letter-spacing:.2px;
+    transition: transform .12s ease, box-shadow .12s ease;
+  }
+  .btn-primary:active{ transform:scale(.97); box-shadow:0 6px 14px rgba(63,117,106,.24); }
+
+  .erro{
+    opacity:0; max-height:0; overflow:hidden;
+    color:#A74F48; font-size:13px; font-weight:800;
+    text-align:center; transition:opacity .25s, max-height .25s, margin .25s;
+  }
+  .erro.visivel{ opacity:1; max-height:60px; margin-top:12px; }
+
+  .dica{
+    text-align:center; font-size:12.5px; line-height:1.6;
+    color:var(--suave); padding:0 18px;
+  }
+  .backup-import{
+    border-top:1px solid #DCE6DE;
+    margin-top:18px;
+    padding-top:14px;
+  }
+  .backup-import label{
+    display:block; margin-bottom:8px;
+    color:var(--suave); font-size:12px; line-height:1.5; font-weight:700;
+  }
+  .backup-import input{ width:100%; font:inherit; font-size:12px; }
+  .login-aviso{
+    margin:10px 0 0; color:var(--suave); font-size:11px; line-height:1.5;
+    text-align:center;
+  }
+  .btn-secondary{
+    width:100%; min-height:48px; margin-top:10px;
+    border:1px solid #DCE6DE; border-radius:16px;
+    background:#fff; color:#48675B; font:inherit;
+    font-size:13px; font-weight:800; cursor:pointer;
+  }
+  .sync-status{
+    min-height:16px; margin:0 2px 6px;
+    color:var(--suave); font-size:11px; font-weight:700;
+  }
+  .sync-status.erro{ color:#A74F48; }
+  .topo-acoes{ display:flex; align-items:center; gap:7px; }
+  .btn-exportar{
+    min-height:38px; padding:0 10px; border:0; border-radius:13px;
+    background:#fff; color:#547A6D; font:inherit; font-size:11px;
+    font-weight:800; cursor:pointer; box-shadow:0 4px 12px rgba(49,72,62,.12);
+  }
+  .btn-sair{
+    min-height:38px; padding:0 11px; border:0; border-radius:13px;
+    background:#fff; color:#547A6D; font:inherit; font-size:12px;
+    font-weight:800; cursor:pointer; box-shadow:0 4px 12px rgba(49,72,62,.12);
+  }
+
+  /* ---------- TOPO ---------- */
+  .topo{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 2px 12px;
+  }
+  .marca{ font-size:16.5px; font-weight:800; color:#40564D; }
+  .btn-reset{
+    width:40px; height:40px; border-radius:15px; border:0;
+    background:#fff; color:#547A6D; font-size:19px; line-height:1;
+    display:grid; place-items:center; cursor:pointer;
+    box-shadow:0 4px 12px rgba(49,72,62,.16);
+    transition: transform .18s ease;
+  }
+  .btn-reset:active{ transform:scale(.9) rotate(-70deg); }
+
+  /* ---------- RESUMO STICKY ---------- */
+  .sticky{
+    position:sticky; top:0; z-index:30;
+    margin:0 0 12px;
+    padding:2px 0 8px;
+    background:transparent;
+  }
+  .resumo{
+    background:#fff; border-radius:22px; padding:14px 16px 13px;
+    box-shadow:0 6px 20px rgba(49,72,62,.13);
+  }
+  .linha-topo{ display:flex; justify-content:space-between; align-items:flex-end; gap:10px; }
+  .bloco{ display:flex; flex-direction:column; gap:2px; min-width:0; }
+  .bloco.dir{ align-items:flex-end; }
+  .rotulo{
+    font-size:10.5px; font-weight:800; letter-spacing:.7px;
+    text-transform:uppercase; color:var(--suave);
+  }
+  .bloco strong{ font-size:18px; font-weight:800; color:#40564D; }
+  .bloco.dir strong{ font-size:13.5px; font-weight:700; color:var(--suave); }
+
+  .barra-linha{ display:flex; align-items:center; gap:10px; margin:11px 0 8px; }
+  .barra{
+    flex:1; height:12px; border-radius:99px;
+    background:#E4EAE2; overflow:hidden;
+  }
+  .barra-fill{
+    height:100%; width:0%; border-radius:99px;
+    background:linear-gradient(90deg,#3F756A 0%,#82986E 60%,#C48A59 100%);
+    transition: width .45s cubic-bezier(.2,.8,.3,1);
+  }
+  .pct{ font-size:12px; font-weight:800; color:#526D63; min-width:36px; text-align:right; }
+
+  .linha-baixo{
+    display:flex; justify-content:space-between; gap:10px;
+    font-size:12px; font-weight:700; color:var(--suave);
+  }
+  .linha-baixo span:last-child{ white-space:nowrap; }
+
+  .prazo-info{
+    flex:1;
+    color:#48675B;
+    font-size:12px;
+    font-weight:800;
+    line-height:1.45;
+  }
+  .prazo-card{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin:10px 2px 0;
+    padding:10px 12px;
+    border-radius:14px;
+    background:#E8EFE8;
+  }
+  .btn-ajustar-prazo{
+    flex-shrink:0;
+    border:0;
+    border-radius:11px;
+    padding:8px 10px;
+    background:#fff;
+    color:#48675B;
+    font:inherit;
+    font-size:11px;
+    font-weight:800;
+    cursor:pointer;
+  }
+  .prazo-edicao{ padding:16px; }
+  .prazo-edicao label{
+    display:block;
+    margin:0 0 7px 8px;
+    color:var(--suave);
+    font-size:13px;
+    font-weight:700;
+  }
+  .prazo-edicao .input-wrap{ margin-bottom:8px; }
+  .prazo-edicao input{
+    flex:1;
+    min-width:0;
+    border:0;
+    outline:none;
+    background:transparent;
+    color:var(--texto);
+    font:inherit;
+    font-size:16px;
+    font-weight:800;
+  }
+  .edit-value-row{ display:flex; gap:8px; }
+  .edit-value-row input{ width:auto; min-width:0; flex:1; }
+  .btn-reset-valor{
+    flex-shrink:0;
+    min-height:46px;
+    padding:0 10px;
+    border:0;
+    border-radius:14px;
+    background:#E8EEE7;
+    color:#48675B;
+    font:inherit;
+    font-size:12px;
+    font-weight:800;
+    cursor:pointer;
+  }
+  .prazo-ajuda{
+    margin:8px 2px 12px;
+    color:var(--suave);
+    font-size:11.5px;
+    line-height:1.5;
+  }
+  .prazo-acoes{ display:flex; gap:8px; }
+  .prazo-acoes button{
+    flex:1;
+    min-height:44px;
+    border:0;
+    border-radius:14px;
+    font:inherit;
+    font-size:12px;
+    font-weight:800;
+    cursor:pointer;
+  }
+  .btn-cancelar-prazo{ background:#E8EEE7; color:#64766D; }
+  .btn-salvar-prazo{ background:linear-gradient(135deg,#3F756A,#82986E); color:#fff; }
+  .erro-prazo{ margin-top:8px; }
+  @media (max-width:380px){
+    .prazo-card{ align-items:flex-start; flex-direction:column; }
+    .btn-ajustar-prazo{ align-self:flex-end; }
+  }
+
+  /* ---------- DASHBOARD ---------- */
+  .dashboard{
+    background:#fff;
+    border-radius:22px;
+    padding:16px;
+    margin:14px 0 2px;
+    box-shadow:0 6px 20px rgba(49,72,62,.1);
+  }
+  .dashboard h2{ font-size:15px; margin:0 0 12px; }
+  .dash-item{ display:grid; grid-template-columns:1fr auto; gap:5px 10px; margin-top:12px; }
+  .dash-nome,.dash-valor{ font-size:12.5px; font-weight:800; }
+  .dash-valor{ text-align:right; }
+  .dash-info{ grid-column:1/-1; color:var(--suave); font-size:11px; font-weight:700; }
+  .dash-barra{ grid-column:1/-1; height:7px; background:#E4EAE2; border-radius:99px; overflow:hidden; }
+  .dash-barra span{ display:block; height:100%; width:0; border-radius:99px; transition:width .3s ease; }
+  #dashMatheusBar{ background:var(--matheus); }
+  #dashAntonellaBar{ background:var(--antonella); }
+  #dashJuntosBar{ background:var(--juntos); }
+
+  /* ---------- QUEM ---------- */
+  .quem{
+    display:flex; flex-direction:column; gap:8px;
+    padding:16px 2px 14px;
+  }
+  .quem-label{ font-size:12px; font-weight:800; color:var(--suave); margin-left:6px; }
+  .seg{
+    display:flex; gap:5px; padding:5px;
+    background:#E8EFE8; border-radius:18px;
+  }
+  .seg button{
+    flex:1; border:0; background:transparent; border-radius:14px;
+    padding:11px 2px; font:inherit; font-size:12.5px; font-weight:800;
+    color:var(--suave); cursor:pointer; white-space:nowrap;
+    transition: background .18s, color .18s, box-shadow .18s;
+  }
+  .seg button.ativo{ background:#fff; box-shadow:0 3px 10px rgba(49,72,62,.16); }
+  .seg button.ativo[data-quem="eu"]{ color:#3F756A; }
+  .seg button.ativo[data-quem="ela"]{ color:#A76746; }
+  .seg button.ativo[data-quem="juntos"]{ color:#687F54; }
+
+  /* ---------- GRADE ---------- */
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(86px, 1fr));
+    gap:9px;
+  }
+
+  .day{
+    background:#fff;
+    border:2px solid transparent;
+    border-radius:17px;
+    padding:9px 4px 7px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:1px;
+    min-height:76px;
+    cursor:pointer;
+    user-select:none;
+    -webkit-user-select:none;
+    touch-action:manipulation;
+    box-shadow:0 4px 12px rgba(49,72,62,.1);
+    transition: transform .12s ease, background .18s, border-color .18s, box-shadow .18s;
+  }
+  .day:active{ transform:scale(.94); }
+
+  .day .num{
+    font-size:9.5px; font-weight:800; letter-spacing:.5px;
+    color:#AEB9AF;
+  }
+  .day .val{
+    font-size:12.5px; font-weight:800; color:#40564D;
+    white-space:nowrap; letter-spacing:-.2px;
+  }
+  .day .tag{
+    font-size:9px; font-weight:800; letter-spacing:.5px;
+    text-transform:uppercase;
+    min-height:16px; line-height:16px;
+    padding:0 7px; border-radius:8px;
+    color:transparent; background:transparent;
+    margin-top:1px;
+    transition: color .18s, background .18s;
+  }
+  .day .date{
+    min-height:12px;
+    margin-top:1px;
+    color:var(--suave);
+    font-size:8.5px;
+    font-weight:700;
+    white-space:nowrap;
+  }
+
+  .day.done.eu     { --cbg:#E3ECE7; --cbd:#AAC6B8; --cc:#3F756A; }
+  .day.done.ela    { --cbg:#F2E6DC; --cbd:#D6B69D; --cc:#A76746; }
+  .day.done.juntos { --cbg:#E9EEDF; --cbd:#C1CDA9; --cc:#687F54; }
+
+  .day.done{
+    background:var(--cbg);
+    border-color:var(--cbd);
+    box-shadow:0 3px 10px rgba(49,72,62,.08);
+  }
+  .day.done .num{ color:var(--cc); opacity:.6; }
+  .day.done .val{
+    color:var(--cc);
+    text-decoration:line-through;
+    text-decoration-thickness:1.5px;
+    opacity:.75;
+  }
+  .day.done .tag{
+    color:var(--cc);
+    background:rgba(255,255,255,.78);
+  }
+
+  .rodape{
+    text-align:center; font-size:11.5px; line-height:1.7;
+    color:#718079; padding:22px 12px 0; margin:0;
+  }
+
+  /* ---------- MODAL ---------- */
+  .modal{
+    position:fixed; inset:0; z-index:100;
+    display:flex; align-items:center; justify-content:center;
+    padding:24px;
+    background:rgba(43,58,51,.38);
+    -webkit-backdrop-filter:blur(5px);
+    backdrop-filter:blur(5px);
+    animation:fade .18s ease;
+  }
+  @keyframes fade{ from{opacity:0} to{opacity:1} }
+  @keyframes pop{ from{transform:scale(.92); opacity:0} to{transform:scale(1); opacity:1} }
+
+  .modal-box{
+    background:#fff; border-radius:26px; padding:26px 22px 22px;
+    width:100%; max-width:330px; text-align:center;
+    box-shadow:0 20px 50px rgba(43,58,51,.22);
+    animation:pop .22s cubic-bezier(.2,.9,.3,1.2);
+  }
+  .modal-box .emoji{ font-size:36px; margin-bottom:10px; }
+  .modal-box h3{ font-size:17px; margin:0 0 8px; }
+  .modal-box p{ font-size:13.5px; line-height:1.5; color:var(--suave); margin:0 0 20px; }
+  .modal-actions{ display:flex; gap:10px; }
+  .modal-actions button{
+    flex:1; height:50px; border:0; border-radius:16px;
+    font:inherit; font-size:14px; font-weight:800; cursor:pointer;
+    transition: transform .12s ease;
+  }
+  .modal-actions button:active{ transform:scale(.96); }
+  .btn-sec{ background:#E8EEE7; color:#64766D; }
+  .btn-conf{ background:linear-gradient(135deg,#3F756A,#82986E); color:#fff; }
+  .edit-field{ margin:0 0 12px; text-align:left; }
+  .edit-field label{
+    display:block;
+    margin:0 0 6px 4px;
+    color:var(--suave);
+    font-size:12px;
+    font-weight:800;
+  }
+  .edit-field input{
+    width:100%;
+    min-height:46px;
+    padding:0 12px;
+    border:2px solid #DCE6DE;
+    border-radius:14px;
+    background:#F5F7F2;
+    color:var(--texto);
+    font:inherit;
+    font-size:16px;
+    font-weight:800;
+  }
+  .edit-help{
+    margin:0 0 14px !important;
+    text-align:left;
+    font-size:11.5px !important;
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <section id="tela-login">
+    <div class="setup-topo">
+      <div class="setup-emoji">🧸</div>
+      <h1>Nosso Cofrinho</h1>
+      <p>Quem está entrando?</p>
+    </div>
+    <div class="card">
+      <button class="btn-primary" id="btnMatheus" type="button">🌸 Entrar como Matheus</button>
+      <button class="btn-secondary" id="btnAntonella" type="button">💜 Entrar como Antonella</button>
+      <div class="erro" id="erroLogin" role="alert"></div>
+      <p class="login-aviso">Sem senha: qualquer pessoa com o link poderá ver e alterar o cofrinho.</p>
+    </div>
+  </section>
+
+  <!-- ========== TELA DE CONFIGURAÇÃO ========== -->
+  <section id="tela-setup" hidden>
+    <div class="setup-topo">
+      <div class="setup-emoji">🧸</div>
+      <h1>Nosso Cofrinho</h1>
+      <p>Escolham até quando querem juntar.<br>Cada quadradinho guarda um valor surpresinha 💗</p>
+    </div>
+
+    <div class="card">
+      <div class="campo">
+        <label for="inpTotal">Valor total a juntar</label>
+        <div class="input-wrap">
+          <span class="prefixo">R$</span>
+          <input id="inpTotal" type="text" inputmode="decimal" placeholder="40.000,00" autocomplete="off">
+        </div>
+      </div>
+
+      <div class="campo">
+        <label for="inpPrazo">Até que dia querem juntar?</label>
+        <div class="input-wrap">
+          <input id="inpPrazo" type="date" autocomplete="off">
+        </div>
+      </div>
+
+      <button class="btn-primary" id="btnGerar">Gerar minha grade fofa ✨</button>
+      <div class="erro" id="erro"></div>
+      <div class="backup-import">
+        <label for="inpBackup">Já tinham um cofrinho neste navegador? Importem aqui o arquivo de backup.</label>
+        <input id="inpBackup" type="file" accept=".json,application/json">
+        <div class="erro" id="erroBackup" role="alert"></div>
+      </div>
+    </div>
+
+    <p class="dica">Os valores são sorteados com centavos e a soma fecha<br>certinho, sem sobrar nem faltar nenhum centavinho.</p>
+  </section>
+
+  <!-- ========== TELA DO APP ========== -->
+  <section id="tela-app" hidden>
+
+    <div class="topo">
+      <div class="marca">🧸 Nosso Cofrinho</div>
+      <div class="topo-acoes">
+        <button class="btn-exportar" id="btnExportar" type="button">Backup</button>
+        <button class="btn-sair" id="btnSair" type="button">Sair</button>
+        <button class="btn-reset" id="btnReset" aria-label="Nova meta">↺</button>
+      </div>
+    </div>
+    <div class="sync-status" id="syncStatus" role="status" aria-live="polite"></div>
+
+    <div class="sticky">
+      <div class="resumo">
+        <div class="linha-topo">
+          <div class="bloco">
+            <span class="rotulo">Guardado</span>
+            <strong id="rGuardado">R$ 0,00</strong>
+          </div>
+          <div class="bloco dir">
+            <span class="rotulo">Meta</span>
+            <strong id="rMeta">R$ 0,00</strong>
+          </div>
+        </div>
+        <div class="barra-linha">
+          <div class="barra"><div class="barra-fill" id="rBarra"></div></div>
+          <span class="pct" id="rPct">0%</span>
+        </div>
+        <div class="linha-baixo">
+          <span id="rFalta">Faltam R$ 0,00</span>
+          <span id="rCount">0/0</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="prazo-card">
+      <div class="prazo-info" id="prazoInfo" role="status"></div>
+      <button class="btn-ajustar-prazo" id="btnEditarPrazo" type="button">Ajustar prazo</button>
+    </div>
+    <div class="card prazo-edicao" id="prazoEdicao" hidden>
+      <label for="inpNovoPrazo">Nova data final</label>
+      <div class="input-wrap">
+        <input id="inpNovoPrazo" type="date" autocomplete="off">
+      </div>
+      <p class="prazo-ajuda">As marcações e o progresso serão mantidos. Os valores dos quadradinhos ainda não marcados podem mudar para continuar somando a meta.</p>
+      <div class="prazo-acoes">
+        <button class="btn-cancelar-prazo" id="btnCancelarPrazo" type="button">Cancelar</button>
+        <button class="btn-salvar-prazo" id="btnSalvarPrazo" type="button">Salvar prazo</button>
+      </div>
+      <div class="erro erro-prazo" id="erroPrazo"></div>
+    </div>
+
+    <section class="dashboard" aria-labelledby="dashboardTitle">
+      <h2 id="dashboardTitle">📊 Quanto cada um já guardou?</h2>
+      <div class="dash-item">
+        <span class="dash-nome">🌸 Matheus</span>
+        <span class="dash-valor" id="dashMatheus">R$ 0,00</span>
+        <span class="dash-info" id="dashMatheusInfo">0 quadradinhos · 0% do guardado</span>
+        <div class="dash-barra"><span id="dashMatheusBar"></span></div>
+      </div>
+      <div class="dash-item">
+        <span class="dash-nome">💜 Antonella</span>
+        <span class="dash-valor" id="dashAntonella">R$ 0,00</span>
+        <span class="dash-info" id="dashAntonellaInfo">0 quadradinhos · 0% do guardado</span>
+        <div class="dash-barra"><span id="dashAntonellaBar"></span></div>
+      </div>
+      <div class="dash-item">
+        <span class="dash-nome">🤝 Juntos</span>
+        <span class="dash-valor" id="dashJuntos">R$ 0,00</span>
+        <span class="dash-info" id="dashJuntosInfo">0 quadradinhos · 0% do guardado</span>
+        <div class="dash-barra"><span id="dashJuntosBar"></span></div>
+      </div>
+    </section>
+
+    <div class="quem">
+      <span class="quem-label">Quem guardou?</span>
+      <div class="seg" id="segQuem">
+        <button data-quem="eu">🌸 Matheus</button>
+        <button data-quem="ela">💜 Antonella</button>
+        <button data-quem="juntos">🤝 Juntos</button>
+      </div>
+    </div>
+
+    <div class="grid" id="grid"></div>
+
+    <p class="rodape">Toque num quadradinho vazio para registrar. Toque num marcado para remover.<br>Segure um marcado para ajustar data ou valor; os pendentes podem mudar 💫</p>
+  </section>
+
+</div>
+
+<!-- ========== MODAL ========== -->
+<div class="modal" id="modal" hidden>
+  <div class="modal-box">
+    <div class="emoji">🧸</div>
+    <h3>Começar uma nova meta?</h3>
+    <p>Todo o progresso guardado até agora será apagado com carinho.</p>
+    <div class="modal-actions">
+      <button class="btn-sec" id="btnCancelar">Cancelar</button>
+      <button class="btn-conf" id="btnConfirmar">Sim, resetar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="modalEdicao" hidden>
+  <div class="modal-box">
+    <div class="emoji">✏️</div>
+    <h3 id="edicaoTitulo">Ajustar quadradinho</h3>
+    <p class="edit-help">Se mudar o valor, os quadradinhos pendentes serão recalculados para a soma continuar igual à meta.</p>
+    <div class="edit-field">
+      <label for="edicaoValor">Valor guardado</label>
+      <div class="edit-value-row">
+        <input id="edicaoValor" type="text" inputmode="decimal" autocomplete="off">
+        <button class="btn-reset-valor" id="btnRestaurarValor" type="button" aria-label="Restaurar valor padrão" title="Restaurar valor padrão">↺ Padrão</button>
+      </div>
+    </div>
+    <div class="edit-field">
+      <label for="edicaoData">Data em que foi guardado</label>
+      <input id="edicaoData" type="date">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-sec" id="btnCancelarEdicao" type="button">Cancelar</button>
+      <button class="btn-conf" id="btnSalvarEdicao" type="button">Salvar</button>
+    </div>
+    <div class="erro" id="erroEdicao"></div>
+  </div>
+</div>
+
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>

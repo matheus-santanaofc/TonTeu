@@ -1,0 +1,20 @@
+{
+  "name": "tonteu-cofrinho",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node ./node_modules/vite/bin/vite.js",
+    "build": "node ./node_modules/vite/bin/vite.js build",
+    "preview": "node ./node_modules/vite/bin/vite.js preview"
+  },
+  "dependencies": {
+    "firebase": "^11.10.0"
+  },
+  "devDependencies": {
+    "vite": "^7.3.8"
+  },
+  "overrides": {
+    "@grpc/grpc-js": "1.14.7"
+  }
+}

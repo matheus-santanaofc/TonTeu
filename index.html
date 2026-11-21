@@ -156,7 +156,16 @@
     display:flex; align-items:center; justify-content:space-between;
     padding:16px 2px 12px;
   }
-  .marca{ font-size:16.5px; font-weight:800; color:#40564D; }
+  .marca{
+    display:flex; align-items:center; gap:8px;
+    font-size:16.5px; font-weight:800; color:#40564D;
+  }
+  .marca-foto{
+    width:34px; height:34px; flex:none;
+    object-fit:cover; object-position:center 44%;
+    border:2px solid rgba(255,255,255,.92); border-radius:12px;
+    box-shadow:0 4px 12px rgba(49,72,62,.14);
+  }
   .btn-reset{
     width:40px; height:40px; border-radius:15px; border:0;
     background:#fff; color:#547A6D; font-size:19px; line-height:1;
@@ -529,7 +538,10 @@
   <section id="tela-app" hidden>
 
     <div class="topo">
-      <div class="marca">🧸 TonTeu</div>
+      <div class="marca">
+        <img class="marca-foto" src="./P%C3%B4r%20do%20Sol%20e%20Pr%C3%B3xima%20Viagem.png" alt="">
+        <span>TonTeu</span>
+      </div>
       <div class="topo-acoes">
         <button class="btn-exportar" id="btnExportar" type="button">Backup</button>
         <button class="btn-sair" id="btnSair" type="button">Sair</button>

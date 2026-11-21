@@ -198,6 +198,15 @@
   }
   .bloco strong{ font-size:18px; font-weight:800; color:#40564D; }
   .bloco.dir strong{ font-size:13.5px; font-weight:700; color:var(--suave); }
+  .guardado-total{ display:flex; align-items:center; gap:7px; }
+  .btn-adjust-total{
+    width:28px; height:28px; flex:none;
+    display:grid; place-items:center;
+    border:1px solid #DCE6DE; border-radius:10px;
+    background:#F7F9F5; color:#48675B;
+    font:inherit; font-size:14px; font-weight:800;
+    cursor:pointer;
+  }
 
   .barra-linha{ display:flex; align-items:center; gap:10px; margin:11px 0 8px; }
   .barra{
@@ -344,7 +353,7 @@
   .seg button.ativo[data-quem="eu"]{ color:#3F756A; }
   .seg button.ativo[data-quem="ela"]{ color:#A76746; }
   .seg button.ativo[data-quem="juntos"]{ color:#687F54; }
-  .btn-add-value,.btn-adjust-total{
+  .btn-add-value{
     width:100%; min-height:46px; border:1px solid #DCE6DE;
     border-radius:16px; background:#fff; color:#48675B;
     font:inherit; font-size:13px; font-weight:800; cursor:pointer;
@@ -564,7 +573,10 @@
         <div class="linha-topo">
           <div class="bloco">
             <span class="rotulo">Guardado</span>
-            <strong id="rGuardado">R$ 0,00</strong>
+            <div class="guardado-total">
+              <strong id="rGuardado">R$ 0,00</strong>
+              <button class="btn-adjust-total" id="btnAjustarTotal" type="button" aria-label="Ajustar total guardado" title="Ajustar total guardado">✎</button>
+            </div>
           </div>
           <div class="bloco dir">
             <span class="rotulo">Meta</span>
@@ -629,7 +641,6 @@
         <button data-quem="juntos">🤝 Juntos</button>
       </div>
       <button class="btn-add-value" id="btnAdicionarValor" type="button">＋ Adicionar valor guardado</button>
-      <button class="btn-adjust-total" id="btnAjustarTotal" type="button">↻ Ajustar total guardado</button>
     </div>
 
     <div class="grid" id="grid"></div>

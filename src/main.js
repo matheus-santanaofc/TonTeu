@@ -251,7 +251,7 @@ import { auth, db } from './firebase.js';
 
   function mesclarAlteracoes(base, local, remoto){
     const resultado = copiarEstado(remoto);
-    ['totalCents', 'n', 'prazo', 'quem'].forEach(function(chave){
+    ['totalCents', 'n', 'prazo', 'quem', 'roundingVersion'].forEach(function(chave){
       if(!mesmoValor(local[chave], base[chave])) resultado[chave] = local[chave];
     });
 
@@ -433,6 +433,114 @@ import { auth, db } from './firebase.js';
 
     state.items = itens;
     state.n = itens.length;
+  }
+
+  function redistribuirTotalGuardado(novoTotal){
+    if(!Number.isSafeInteger(novoTotal) || novoTotal < 0 || novoTotal > state.totalCents) return false;
+
+    const marcados = state.items.map(function(item, indice){
+      return { item:item, indice:indice };
+    }).filter(function(registro){ return !!registro.item.by; });
+
+    if(novoTotal === 0){
+      marcados.forEach(function(registro){
+        registro.item.by = null;
+        registro.item.savedOn = null;
+      });
+    } else {
+      if(!marcados.length){
+        const primeiroPendente = state.items.find(function(item){ return !item.by; });
+        if(!primeiroPendente) return false;
+        primeiroPendente.by = state.quem;
+        primeiroPendente.savedOn = dataLocalISO(new Date());
+        marcados.push({
+          item:primeiroPendente,
+          indice:state.items.indexOf(primeiroPendente)
+        });
+      }
+
+      const unidades = Math.floor(novoTotal / 50);
+      const residuo = novoTotal % 50;
+      const quantidadeManter = Math.min(marcados.length, Math.max(1, unidades));
+      marcados.sort(function(a, b){
+        const dataA = a.item.savedOn || '';
+        const dataB = b.item.savedOn || '';
+        return dataA.localeCompare(dataB) || a.indice - b.indice;
+      });
+      const manter = marcados.slice(0, quantidadeManter);
+      const manterSet = new Set(manter.map(function(registro){ return registro.item; }));
+      marcados.forEach(function(registro){
+        if(!manterSet.has(registro.item)){
+          registro.item.by = null;
+          registro.item.savedOn = null;
+        }
+      });
+
+      const pesoTotal = manter.reduce(function(soma, registro){
+        return soma + registro.item.v;
+      }, 0);
+      const unidadesMinimas = unidades >= manter.length ? 1 : 0;
+      const unidadesExtras = Math.max(0, unidades - unidadesMinimas * manter.length);
+      const distribuicoes = manter.map(function(registro){
+        const exato = pesoTotal > 0
+          ? unidadesExtras * registro.item.v / pesoTotal
+          : unidadesExtras / manter.length;
+        const base = Math.floor(exato);
+        return { registro:registro, unidades:unidadesMinimas + base, fracao:exato - base };
+      });
+      distribuicoes.sort(function(a, b){
+        return b.fracao - a.fracao || a.registro.indice - b.registro.indice;
+      });
+      const unidadesUsadas = distribuicoes.reduce(function(soma, item){
+        return soma + item.unidades - unidadesMinimas;
+      }, 0);
+      for(let i = 0; i < unidades - unidadesMinimas * manter.length - unidadesUsadas; i++){
+        distribuicoes[i % distribuicoes.length].unidades++;
+      }
+      distribuicoes.forEach(function(distribuicao){
+        const item = distribuicao.registro.item;
+        item.v = distribuicao.unidades * 50;
+        item.defaultV = item.v;
+      });
+      if(residuo > 0){
+        const item = distribuicoes[0].registro.item;
+        item.v += residuo;
+        item.defaultV = item.v;
+      }
+    }
+
+    redimensionarGrade(state.items.length);
+    return true;
+  }
+
+  function migrarArredondamento(){
+    if(!state || state.roundingVersion === 1) return false;
+
+    const valoresAlinhados = state.items.every(function(item){
+      return item.v % 50 === 0 &&
+        (typeof item.defaultV !== 'number' || item.defaultV % 50 === 0);
+    });
+    const totalAlinhado = state.totalCents % 50 === 0;
+    if(valoresAlinhados && totalAlinhado){
+      state.roundingVersion = 1;
+      return true;
+    }
+
+    const totalOriginal = state.totalCents;
+    const totalNovo = arredondarPara50Centavos(totalOriginal);
+    const guardado = state.items.reduce(function(soma, item){
+      return soma + (item.by ? item.v : 0);
+    }, 0);
+    const guardadoNovo = arredondarPara50Centavos(guardado);
+    if(!Number.isSafeInteger(totalNovo) || guardadoNovo > totalNovo) return false;
+
+    state.totalCents = totalNovo;
+    if(!redistribuirTotalGuardado(guardadoNovo)){
+      state.totalCents = totalOriginal;
+      return false;
+    }
+    state.roundingVersion = 1;
+    return true;
   }
 
   function abrirEdicaoQuadradinho(indice){
@@ -636,6 +744,7 @@ import { auth, db } from './firebase.js';
           return;
         }
         state = importado;
+        migrarArredondamento();
         salvar();
         abrirApp();
         definirStatusSync('Backup importado; sincronizando com a nuvem...', false);
@@ -700,6 +809,7 @@ import { auth, db } from './firebase.js';
       n: n,
       prazo: prazo,
       quem: currentIdentity || 'eu',
+      roundingVersion: 1,
       items: valores.map(function(v){ return { v: v, defaultV: v, by: null }; })
     };
 
@@ -1040,83 +1150,13 @@ import { auth, db } from './firebase.js';
       return;
     }
 
-    const marcados = state.items.map(function(item, indice){
-      return { item:item, indice:indice };
-    }).filter(function(registro){ return !!registro.item.by; });
-
-    if(novoTotal === 0){
-      marcados.forEach(function(registro){
-        registro.item.by = null;
-        registro.item.savedOn = null;
-      });
-    } else {
-      if(!marcados.length){
-        const primeiroPendente = state.items.find(function(item){ return !item.by; });
-        if(!primeiroPendente){
-          erroAjustarTotal.textContent = 'Não há quadradinhos disponíveis para esse ajuste.';
-          erroAjustarTotal.classList.add('visivel');
-          return;
-        }
-        primeiroPendente.by = state.quem;
-        primeiroPendente.savedOn = dataLocalISO(new Date());
-        marcados.push({
-          item:primeiroPendente,
-          indice:state.items.indexOf(primeiroPendente)
-        });
-      }
-
-      const unidades = Math.floor(novoTotal / 50);
-      const residuo = novoTotal % 50;
-      const quantidadeManter = Math.min(marcados.length, Math.max(1, unidades));
-      marcados.sort(function(a, b){
-        const dataA = a.item.savedOn || '';
-        const dataB = b.item.savedOn || '';
-        return dataA.localeCompare(dataB) || a.indice - b.indice;
-      });
-      const manter = marcados.slice(0, quantidadeManter);
-      const manterSet = new Set(manter.map(function(registro){ return registro.item; }));
-      marcados.forEach(function(registro){
-        if(!manterSet.has(registro.item)){
-          registro.item.by = null;
-          registro.item.savedOn = null;
-        }
-      });
-
-      const pesoTotal = manter.reduce(function(soma, registro){
-        return soma + registro.item.v;
-      }, 0);
-      const unidadesMinimas = unidades >= manter.length ? 1 : 0;
-      const unidadesExtras = Math.max(0, unidades - unidadesMinimas * manter.length);
-      const distribuicoes = manter.map(function(registro){
-        const exato = pesoTotal > 0
-          ? unidadesExtras * registro.item.v / pesoTotal
-          : unidadesExtras / manter.length;
-        const base = Math.floor(exato);
-        return { registro:registro, unidades:unidadesMinimas + base, fracao:exato - base };
-      });
-      let unidadesUsadas = 0;
-      distribuicoes.sort(function(a, b){
-        return b.fracao - a.fracao || a.registro.indice - b.registro.indice;
-      });
-      unidadesUsadas = distribuicoes.reduce(function(soma, item){
-        return soma + item.unidades - unidadesMinimas;
-      }, 0);
-      for(let i = 0; i < unidades - unidadesMinimas * manter.length - unidadesUsadas; i++){
-        distribuicoes[i % distribuicoes.length].unidades++;
-      }
-      distribuicoes.forEach(function(distribuicao){
-        const item = distribuicao.registro.item;
-        item.v = distribuicao.unidades * 50;
-        item.defaultV = item.v;
-      });
-      if(residuo > 0){
-        const item = distribuicoes[0].registro.item;
-        item.v += residuo;
-        item.defaultV = item.v;
-      }
+    if(!redistribuirTotalGuardado(novoTotal)){
+      erroAjustarTotal.textContent = 'Não foi possível aplicar esse ajuste aos quadradinhos.';
+      erroAjustarTotal.classList.add('visivel');
+      return;
     }
 
-    redimensionarGrade(state.items.length);
+    state.roundingVersion = 1;
     salvar();
     renderGrade();
     atualizarQuem();
@@ -1162,6 +1202,7 @@ import { auth, db } from './firebase.js';
           state = carregar();
           if(state){
             state.quem = currentIdentity;
+            migrarArredondamento();
             abrirApp();
             salvar();
           } else {
@@ -1188,11 +1229,12 @@ import { auth, db } from './firebase.js';
         }
         state = remoto;
         lastCloudState = copiarEstado(remoto);
+        const arredondamentoMudou = migrarArredondamento();
         const identidadeMudou = currentIdentity && state.quem !== currentIdentity;
         if(identidadeMudou) state.quem = currentIdentity;
         salvarLocalmente();
         abrirApp();
-        if(identidadeMudou) salvar();
+        if(identidadeMudou || arredondamentoMudou) salvar();
         else definirStatusSync('Sincronizado com o cofrinho compartilhado.', false);
         return;
       }
@@ -1215,9 +1257,11 @@ import { auth, db } from './firebase.js';
       lastCloudState = copiarEstado(remoto);
       if(mesmoValor(state, remoto)) return;
       state = remoto;
+      const arredondamentoMudou = migrarArredondamento();
       salvarLocalmente();
       abrirApp();
-      definirStatusSync('Atualizado pelo outro aparelho.', false);
+      if(arredondamentoMudou) salvar();
+      else definirStatusSync('Atualizado pelo outro aparelho.', false);
     }, function(error){
       console.error('Falha ao receber atualizações do Firestore.', error);
       cloudReady = false;

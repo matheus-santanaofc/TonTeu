@@ -141,6 +141,12 @@
     min-height:16px; margin:0 2px 6px;
     color:var(--suave); font-size:11px; font-weight:700;
   }
+  .app-foto-casal{
+    display:block; width:100%; height:auto; max-width:100%;
+    object-fit:contain; margin:0 0 14px;
+    border-radius:20px;
+    box-shadow:0 8px 24px rgba(49,72,62,.14);
+  }
   .sync-status.erro{ color:#A74F48; }
   .topo-acoes{ display:flex; align-items:center; gap:7px; }
   .btn-exportar{
@@ -159,16 +165,7 @@
     display:flex; align-items:center; justify-content:space-between;
     padding:16px 2px 12px;
   }
-  .marca{
-    display:flex; align-items:center; gap:8px;
-    font-size:16.5px; font-weight:800; color:#40564D;
-  }
-  .marca-foto{
-    width:34px; height:34px; flex:none;
-    object-fit:cover; object-position:center 44%;
-    border:2px solid rgba(255,255,255,.92); border-radius:12px;
-    box-shadow:0 4px 12px rgba(49,72,62,.14);
-  }
+  .marca{ font-size:16.5px; font-weight:800; color:#40564D; }
   .btn-reset{
     width:40px; height:40px; border-radius:15px; border:0;
     background:#fff; color:#547A6D; font-size:19px; line-height:1;
@@ -556,10 +553,7 @@
   <section id="tela-app" hidden>
 
     <div class="topo">
-      <div class="marca">
-        <img class="marca-foto" src="./P%C3%B4r%20do%20Sol%20e%20Pr%C3%B3xima%20Viagem.png" alt="">
-        <span>TonTeu</span>
-      </div>
+      <div class="marca">TonTeu</div>
       <div class="topo-acoes">
         <button class="btn-exportar" id="btnExportar" type="button">Backup</button>
         <button class="btn-sair" id="btnSair" type="button">Sair</button>
@@ -567,6 +561,7 @@
       </div>
     </div>
     <div class="sync-status" id="syncStatus" role="status" aria-live="polite"></div>
+    <img class="app-foto-casal" src="./P%C3%B4r%20do%20Sol%20e%20Pr%C3%B3xima%20Viagem.png" alt="Foto completa de Matheus e Antonella ao pôr do sol">
 
     <div class="sticky">
       <div class="resumo">

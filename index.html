@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#F3F2EA">
-<title>Nosso Cofrinho 💗</title>
+<title>TonTeu 💗</title>
 <style>
   :root{
     --texto:#33443E;
@@ -114,6 +114,19 @@
   .login-aviso{
     margin:10px 0 0; color:var(--suave); font-size:11px; line-height:1.5;
     text-align:center;
+  }
+  .login-foto{
+    display:block;
+    width:min(180px, 55vw);
+    height:min(180px, 55vw);
+    max-width:180px;
+    max-height:180px;
+    margin:0 auto 16px;
+    object-fit:cover;
+    object-position:center 44%;
+    border:4px solid rgba(255,255,255,.92);
+    border-radius:28px;
+    box-shadow:0 10px 26px rgba(49,72,62,.18);
   }
   .btn-secondary{
     width:100%; min-height:48px; margin-top:10px;
@@ -338,11 +351,15 @@
     cursor:pointer;
     user-select:none;
     -webkit-user-select:none;
+    -webkit-touch-callout:none;
     touch-action:manipulation;
     box-shadow:0 4px 12px rgba(49,72,62,.1);
     transition: transform .12s ease, background .18s, border-color .18s, box-shadow .18s;
   }
   .day:active{ transform:scale(.94); }
+  @media (hover:none){
+    .day:active{ transform:none; }
+  }
 
   .day .num{
     font-size:9.5px; font-weight:800; letter-spacing:.5px;
@@ -460,8 +477,8 @@
 
   <section id="tela-login">
     <div class="setup-topo">
-      <div class="setup-emoji">🧸</div>
-      <h1>Nosso Cofrinho</h1>
+      <img class="login-foto" src="./P%C3%B4r%20do%20Sol%20e%20Pr%C3%B3xima%20Viagem.png" alt="Matheus e Antonella juntos ao pôr do sol">
+      <h1>TonTeu</h1>
       <p>Quem está entrando?</p>
     </div>
     <div class="card">
@@ -476,7 +493,7 @@
   <section id="tela-setup" hidden>
     <div class="setup-topo">
       <div class="setup-emoji">🧸</div>
-      <h1>Nosso Cofrinho</h1>
+      <h1>TonTeu</h1>
       <p>Escolham até quando querem juntar.<br>Cada quadradinho guarda um valor surpresinha 💗</p>
     </div>
 
@@ -512,7 +529,7 @@
   <section id="tela-app" hidden>
 
     <div class="topo">
-      <div class="marca">🧸 Nosso Cofrinho</div>
+      <div class="marca">🧸 TonTeu</div>
       <div class="topo-acoes">
         <button class="btn-exportar" id="btnExportar" type="button">Backup</button>
         <button class="btn-sair" id="btnSair" type="button">Sair</button>

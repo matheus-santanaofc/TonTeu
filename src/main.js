@@ -763,6 +763,10 @@ import { auth, db } from './firebase.js';
     }, 600);
   });
 
+  grid.addEventListener('contextmenu', function(e){
+    if(e.target.closest('.day')) e.preventDefault();
+  });
+
   grid.addEventListener('pointermove', function(e){
     if(longPressTimer === null || !longPressStart) return;
     const dx = e.clientX - longPressStart.x;

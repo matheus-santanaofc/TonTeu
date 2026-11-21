@@ -66,6 +66,12 @@ import { auth, db } from './firebase.js';
   const btnCancelarAdicionarValor = document.getElementById('btnCancelarAdicionarValor');
   const btnConfirmarAdicionarValor = document.getElementById('btnConfirmarAdicionarValor');
   const erroAdicionarValor = document.getElementById('erroAdicionarValor');
+  const btnAjustarTotal = document.getElementById('btnAjustarTotal');
+  const modalAjustarTotal = document.getElementById('modalAjustarTotal');
+  const inpAjustarTotal = document.getElementById('inpAjustarTotal');
+  const btnCancelarAjustarTotal = document.getElementById('btnCancelarAjustarTotal');
+  const btnConfirmarAjustarTotal = document.getElementById('btnConfirmarAjustarTotal');
+  const erroAjustarTotal = document.getElementById('erroAjustarTotal');
 
   const rGuardado  = document.getElementById('rGuardado');
   const rMeta      = document.getElementById('rMeta');
@@ -337,12 +343,18 @@ import { auth, db } from './firebase.js';
     erroTimer = setTimeout(function(){ erroBox.classList.remove('visivel'); }, 3400);
   }
 
+  function arredondarPara50Centavos(valorCents){
+    return Math.ceil(valorCents / 50) * 50;
+  }
+
   /* ==================== SORTEIO DOS VALORES ==================== */
-  /* Gera N valores em centavos cuja soma é EXATAMENTE totalCents. */
+  /* Gera N valores cuja soma é EXATAMENTE totalCents. */
   function gerarValores(totalCents, n){
+    const passo = totalCents % 50 === 0 ? 50 : 1;
+    const totalUnidades = totalCents / passo;
     // valor mínimo por quadradinho (35% da média)
-    const min = Math.max(1, Math.floor(totalCents / n * 0.35));
-    const restante = totalCents - min * n;
+    const min = Math.max(1, Math.floor(totalUnidades / n * 0.35));
+    const restante = totalUnidades - min * n;
 
     // pesos aleatórios com variação (alguns maiores, outros menores)
     const pesos = new Array(n);
@@ -380,7 +392,7 @@ import { auth, db } from './firebase.js';
       const t = vals[i]; vals[i] = vals[j]; vals[j] = t;
     }
 
-    return vals;
+    return vals.map(function(valor){ return valor * passo; });
   }
 
   function redimensionarGrade(novoN){
@@ -399,7 +411,8 @@ import { auth, db } from './firebase.js';
     while(itens.length < alvo) itens.push({ v:0, defaultV:0, by:null });
 
     let pendentes = itens.filter(function(item){ return !item.by; });
-    while(restante < pendentes.length){
+    const valorMinimoPendente = restante % 50 === 0 ? 50 : 1;
+    while(restante < valorMinimoPendente * pendentes.length){
       let indice = itens.length - 1;
       while(indice >= 0 && itens[indice].by) indice--;
       if(indice < 0) break;
@@ -644,14 +657,21 @@ import { auth, db } from './firebase.js';
   });
 
   btnGerar.addEventListener('click', function(){
-    const totalCents = parseMoney(inpTotal.value);
+    const totalDigitado = parseMoney(inpTotal.value);
     const prazo = inpPrazo.value;
 
-    if(!totalCents || isNaN(totalCents) || totalCents <= 0){
+    if(!Number.isSafeInteger(totalDigitado) || totalDigitado <= 0){
       mostrarErro('Coloque o valor total que vocês querem juntar 💗');
       inpTotal.focus();
       return;
     }
+    const totalCents = arredondarPara50Centavos(totalDigitado);
+    if(!Number.isSafeInteger(totalCents)){
+      mostrarErro('O valor total informado é muito alto.');
+      inpTotal.focus();
+      return;
+    }
+    inpTotal.value = fmt(totalCents);
     if(!prazo){
       mostrarErro('Escolham a data do prazo final ✨');
       inpPrazo.focus();
@@ -877,8 +897,8 @@ import { auth, db } from './firebase.js';
     const item = state.items[itemEmEdicao];
     if(!item || !item.by) return;
 
-    const novoValor = parseMoney(edicaoValor.value);
-    if(isNaN(novoValor) || novoValor <= 0){
+    const valorDigitado = parseMoney(edicaoValor.value);
+    if(!Number.isSafeInteger(valorDigitado) || valorDigitado <= 0){
       erroEdicao.textContent = 'Digite um valor maior que zero 💗';
       erroEdicao.classList.add('visivel');
       edicaoValor.focus();
@@ -897,7 +917,9 @@ import { auth, db } from './firebase.js';
     state.items.forEach(function(outroItem, indice){
       if(indice !== itemEmEdicao && outroItem.by) outrosMarcados += outroItem.v;
     });
-    if(outrosMarcados + novoValor > state.totalCents){
+    const maximoPermitido = state.totalCents - outrosMarcados;
+    const novoValor = valorDigitado === maximoPermitido ? maximoPermitido : arredondarPara50Centavos(valorDigitado);
+    if(novoValor > maximoPermitido){
       erroEdicao.textContent = 'Esse valor ultrapassa o total da meta junto com os outros quadradinhos marcados.';
       erroEdicao.classList.add('visivel');
       edicaoValor.focus();
@@ -937,8 +959,8 @@ import { auth, db } from './firebase.js';
 
   btnConfirmarAdicionarValor.addEventListener('click', function(){
     if(!state) return;
-    const valor = parseMoney(inpAdicionarValor.value);
-    if(!Number.isSafeInteger(valor) || valor <= 0){
+    const valorDigitado = parseMoney(inpAdicionarValor.value);
+    if(!Number.isSafeInteger(valorDigitado) || valorDigitado <= 0){
       erroAdicionarValor.textContent = 'Digite um valor maior que zero 💗';
       erroAdicionarValor.classList.add('visivel');
       inpAdicionarValor.focus();
@@ -949,6 +971,7 @@ import { auth, db } from './firebase.js';
       return soma + (item.by ? item.v : 0);
     }, 0);
     const restante = state.totalCents - guardado;
+    const valor = valorDigitado === restante ? restante : arredondarPara50Centavos(valorDigitado);
     if(valor > restante){
       erroAdicionarValor.textContent = 'Esse valor é maior do que falta para atingir a meta.';
       erroAdicionarValor.classList.add('visivel');
@@ -975,9 +998,136 @@ import { auth, db } from './firebase.js';
     fecharModalAdicionarValor();
   });
 
+  function fecharModalAjustarTotal(){
+    modalAjustarTotal.hidden = true;
+    erroAjustarTotal.classList.remove('visivel');
+  }
+
+  btnAjustarTotal.addEventListener('click', function(){
+    if(!state) return;
+    const guardado = state.items.reduce(function(soma, item){
+      return soma + (item.by ? item.v : 0);
+    }, 0);
+    inpAjustarTotal.value = fmt(guardado);
+    erroAjustarTotal.textContent = '';
+    erroAjustarTotal.classList.remove('visivel');
+    modalAjustarTotal.hidden = false;
+    inpAjustarTotal.focus();
+  });
+
+  btnCancelarAjustarTotal.addEventListener('click', fecharModalAjustarTotal);
+  modalAjustarTotal.addEventListener('click', function(e){
+    if(e.target === modalAjustarTotal) fecharModalAjustarTotal();
+  });
+
+  btnConfirmarAjustarTotal.addEventListener('click', function(){
+    if(!state) return;
+    const totalDigitado = parseMoney(inpAjustarTotal.value);
+    if(!Number.isSafeInteger(totalDigitado) || totalDigitado < 0){
+      erroAjustarTotal.textContent = 'Digite um total válido, que pode ser zero.';
+      erroAjustarTotal.classList.add('visivel');
+      inpAjustarTotal.focus();
+      return;
+    }
+
+    const novoTotal = totalDigitado === state.totalCents
+      ? totalDigitado
+      : arredondarPara50Centavos(totalDigitado);
+    if(novoTotal > state.totalCents){
+      erroAjustarTotal.textContent = 'O total ajustado não pode ultrapassar a meta.';
+      erroAjustarTotal.classList.add('visivel');
+      inpAjustarTotal.focus();
+      return;
+    }
+
+    const marcados = state.items.map(function(item, indice){
+      return { item:item, indice:indice };
+    }).filter(function(registro){ return !!registro.item.by; });
+
+    if(novoTotal === 0){
+      marcados.forEach(function(registro){
+        registro.item.by = null;
+        registro.item.savedOn = null;
+      });
+    } else {
+      if(!marcados.length){
+        const primeiroPendente = state.items.find(function(item){ return !item.by; });
+        if(!primeiroPendente){
+          erroAjustarTotal.textContent = 'Não há quadradinhos disponíveis para esse ajuste.';
+          erroAjustarTotal.classList.add('visivel');
+          return;
+        }
+        primeiroPendente.by = state.quem;
+        primeiroPendente.savedOn = dataLocalISO(new Date());
+        marcados.push({
+          item:primeiroPendente,
+          indice:state.items.indexOf(primeiroPendente)
+        });
+      }
+
+      const unidades = Math.floor(novoTotal / 50);
+      const residuo = novoTotal % 50;
+      const quantidadeManter = Math.min(marcados.length, Math.max(1, unidades));
+      marcados.sort(function(a, b){
+        const dataA = a.item.savedOn || '';
+        const dataB = b.item.savedOn || '';
+        return dataA.localeCompare(dataB) || a.indice - b.indice;
+      });
+      const manter = marcados.slice(0, quantidadeManter);
+      const manterSet = new Set(manter.map(function(registro){ return registro.item; }));
+      marcados.forEach(function(registro){
+        if(!manterSet.has(registro.item)){
+          registro.item.by = null;
+          registro.item.savedOn = null;
+        }
+      });
+
+      const pesoTotal = manter.reduce(function(soma, registro){
+        return soma + registro.item.v;
+      }, 0);
+      const unidadesMinimas = unidades >= manter.length ? 1 : 0;
+      const unidadesExtras = Math.max(0, unidades - unidadesMinimas * manter.length);
+      const distribuicoes = manter.map(function(registro){
+        const exato = pesoTotal > 0
+          ? unidadesExtras * registro.item.v / pesoTotal
+          : unidadesExtras / manter.length;
+        const base = Math.floor(exato);
+        return { registro:registro, unidades:unidadesMinimas + base, fracao:exato - base };
+      });
+      let unidadesUsadas = 0;
+      distribuicoes.sort(function(a, b){
+        return b.fracao - a.fracao || a.registro.indice - b.registro.indice;
+      });
+      unidadesUsadas = distribuicoes.reduce(function(soma, item){
+        return soma + item.unidades - unidadesMinimas;
+      }, 0);
+      for(let i = 0; i < unidades - unidadesMinimas * manter.length - unidadesUsadas; i++){
+        distribuicoes[i % distribuicoes.length].unidades++;
+      }
+      distribuicoes.forEach(function(distribuicao){
+        const item = distribuicao.registro.item;
+        item.v = distribuicao.unidades * 50;
+        item.defaultV = item.v;
+      });
+      if(residuo > 0){
+        const item = distribuicoes[0].registro.item;
+        item.v += residuo;
+        item.defaultV = item.v;
+      }
+    }
+
+    redimensionarGrade(state.items.length);
+    salvar();
+    renderGrade();
+    atualizarQuem();
+    atualizarResumo();
+    fecharModalAjustarTotal();
+  });
+
   document.addEventListener('keydown', function(e){
     if(e.key !== 'Escape') return;
-    if(!modalAdicionarValor.hidden) fecharModalAdicionarValor();
+    if(!modalAjustarTotal.hidden) fecharModalAjustarTotal();
+    else if(!modalAdicionarValor.hidden) fecharModalAdicionarValor();
     else if(!modalEdicao.hidden) fecharEdicaoQuadradinho();
     else if(!modal.hidden) modal.hidden = true;
   });

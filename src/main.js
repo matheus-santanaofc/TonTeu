@@ -30,6 +30,8 @@ import { auth, db } from './firebase.js';
   const btnAntonella = document.getElementById('btnAntonella');
   const btnSair    = document.getElementById('btnSair');
   const btnExportar = document.getElementById('btnExportar');
+  const btnToggleDashboard = document.getElementById('btnToggleDashboard');
+  const dashboard = document.getElementById('dashboard');
   const erroLogin  = document.getElementById('erroLogin');
   const syncStatus = document.getElementById('syncStatus');
   const inpTotal   = document.getElementById('inpTotal');
@@ -715,6 +717,13 @@ import { auth, db } from './firebase.js';
     }
   });
   btnExportar.addEventListener('click', baixarBackup);
+  btnToggleDashboard.addEventListener('click', function(){
+    dashboard.hidden = !dashboard.hidden;
+    const mostrar = dashboard.hidden;
+    btnToggleDashboard.textContent = mostrar ? 'Dados' : 'Ocultar';
+    btnToggleDashboard.setAttribute('aria-expanded', String(!mostrar));
+    btnToggleDashboard.setAttribute('aria-label', mostrar ? 'Mostrar estatísticas' : 'Ocultar estatísticas');
+  });
 
   inpBackup.addEventListener('change', function(){
     const arquivo = inpBackup.files && inpBackup.files[0];

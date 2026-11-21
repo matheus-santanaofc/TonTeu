@@ -556,6 +556,7 @@
       <div class="marca">TonTeu</div>
       <div class="topo-acoes">
         <button class="btn-exportar" id="btnExportar" type="button">Backup</button>
+        <button class="btn-exportar" id="btnToggleDashboard" type="button" aria-controls="dashboard" aria-expanded="false" aria-label="Mostrar estatísticas">Dados</button>
         <button class="btn-sair" id="btnSair" type="button">Sair</button>
         <button class="btn-reset" id="btnReset" aria-label="Nova meta">↺</button>
       </div>
@@ -606,7 +607,7 @@
       <div class="erro erro-prazo" id="erroPrazo"></div>
     </div>
 
-    <section class="dashboard" aria-labelledby="dashboardTitle">
+    <section class="dashboard" id="dashboard" aria-labelledby="dashboardTitle" hidden>
       <h2 id="dashboardTitle">📊 Quanto cada um já guardou?</h2>
       <div class="dash-item">
         <span class="dash-nome">🌸 Matheus</span>
